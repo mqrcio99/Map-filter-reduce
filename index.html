@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Array Market | Aprenda Map, Filter e Reduce em JS</title>
+  <style>
+    /* ==========================================================================
+       1. VARIÁVEIS DE DESIGN & RESET
+       ========================================================================== */
+    :root {
+      --bg-main: #0c0d0f;
+      --bg-surface: #121519;
+      --bg-card: rgba(19, 20, 22, 0.96);
+      --bg-card-strong: #171a1d;
+      --bg-card-soft: #1d2126;
+      --text-main: #f3f1ee;
+      --text-muted: #b7b0a9;
+      --text-soft: #e0d9d1;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --shadow-soft: 0 30px 60px rgba(0, 0, 0, 0.34);
+      --shadow-card: 0 16px 26px rgba(0, 0, 0, 0.14);
+
+      /* Cores de destaque por método JS */
+      --color-brand: #f08a3c;
+      --color-map: #f0a763;
+      --color-filter: #d9a56a;
+      --color-reduce: #e4c77d;
+      --color-danger: #d87161;
+
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+
+      --transition-fast: 0.18s ease;
+      --transition-normal: 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+      --font-family: "Segoe UI Variable", "Inter", "Avenir Next", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-code: 'SFMono-Regular', 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(216, 115, 42, 0.08), transparent 22%),
+        radial-gradient(circle at top right, rgba(216, 115, 42, 0.04), transparent 20%),
+        var(--bg-main);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.45;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      letter-spacing: -0.015em;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      font-feature-settings: "ss01" 1;
+    }
+
+    /* Focus ring acessível */
+    :focus-visible {
+      outline: 3px solid var(--color-brand);
+      outline-offset: 3px;
+    }
+
+    /* ==========================================================================
+       2. HEADER & STEPPER
+       ========================================================================== */
+    .app-header {
+      background: rgba(14, 14, 16, 0.88);
+      backdrop-filter: blur(11px);
+      border-bottom: 1px solid rgba(228, 149, 85, 0.18);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0.8rem 1.2rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.6rem;
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.14);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo {
+      font-size: 1.18rem;
+      font-weight: 800;
+      color: #f3efe8;
+      letter-spacing: -0.065em;
+      text-shadow: 0 0 20px rgba(240, 138, 60, 0.08);
+    }
+
+    .brand-tag {
+      font-size: 0.72rem;
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-muted);
+      padding: 0.28rem 0.68rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .btn-toggle-aula {
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.38rem 0.8rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: var(--transition-fast);
+    }
+
+    .btn-toggle-aula:hover,
+    .btn-toggle-aula.active {
+      background: rgba(216, 115, 42, 0.08);
+      color: var(--text-main);
+      border-color: var(--color-brand);
+    }
+
+    .cart-counter {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: #0f172a;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Stepper de progresso */
+    .stepper-container {
+      background-color: rgba(13, 14, 16, 0.88);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 0.7rem 1rem 0.8rem;
+      overflow-x: auto;
+    }
+
+    .stepper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      max-width: 900px;
+      margin: 0 auto;
+      list-style: none;
+      gap: 0.65rem;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: var(--transition-fast);
+      opacity: 0.8;
+    }
+
+    .step-number {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .step-item.active {
+      color: var(--text-main);
+    }
+
+    .step-item.active .step-number {
+      background-color: var(--color-brand);
+      color: #1c120d;
+      box-shadow: none;
+      border-color: rgba(239, 139, 61, 0.9);
+    }
+
+    .step-item.completed {
+      color: var(--color-map);
+    }
+
+    .step-item.completed .step-number {
+      background-color: var(--color-map);
+      color: #0f172a;
+    }
+
+    .step-divider {
+      flex: 1;
+      height: 2px;
+      background-color: #334155;
+      min-width: 20px;
+      max-width: 60px;
+    }
+
+    /* ==========================================================================
+       3. CONTEÚDO PRINCIPAL & HERO
+       ========================================================================== */
+    .container {
+      max-width: 1130px;
+      margin: 0 auto;
+      padding: 1.1rem 1rem 1.5rem;
+      width: 100%;
+      flex: 1;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-section {
+      text-align: center;
+      margin-bottom: 1.15rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2.2rem, 3vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 0.55rem;
+      line-height: 1;
+      letter-spacing: -0.065em;
+    }
+
+    .hero-subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      margin: 0 auto 0.9rem;
+      line-height: 1.55;
+      font-weight: 500;
+    }
+
+    .scroll-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--color-brand);
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    /* ==========================================================================
+       4. CUPOM GIGANTE (MEMBER COMPONENT)
+       ========================================================================== */
+    .coupon-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.2rem;
+    }
+
+    .coupon-card {
+      background: linear-gradient(135deg, rgba(44, 31, 23, 0.96), rgba(25, 20, 18, 0.96));
+      border: 1px solid rgba(240, 138, 60, 0.26);
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      width: 100%;
+      max-width: 430px;
+      text-align: center;
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+      transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-fast);
+      animation: pulseCoupon 3s infinite ease-in-out;
+      box-shadow: 0 18px 30px rgba(0, 0, 0, 0.18);
+    }
+
+    @keyframes pulseCoupon {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 12px rgba(216, 115, 42, 0.12); }
+      50% { transform: scale(1.02); box-shadow: 0 0 22px rgba(216, 115, 42, 0.18); }
+    }
+
+    .coupon-card:hover {
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 12px 30px rgba(216, 115, 42, 0.14);
+    }
+
+    .coupon-card.unlocked {
+      animation: none;
+      background: linear-gradient(135deg, rgba(18, 27, 22, 0.98), rgba(28, 34, 29, 0.98));
+      border-style: solid;
+      border-color: rgba(84, 171, 114, 0.52);
+      box-shadow: 0 18px 28px rgba(0, 0, 0, 0.22);
+    }
+
+    .coupon-tag {
+      position: absolute;
+      top: -12px;
+      right: 20px;
+      background-color: rgba(84, 171, 114, 0.12);
+      color: #9fe0b0;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.2rem 0.75rem;
+      border-radius: 12px;
+      letter-spacing: 0.08em;
+      border: 1px solid rgba(84, 171, 114, 0.26);
+    }
+
+    .coupon-title {
+      font-size: 1.28rem;
+      font-weight: 800;
+      margin-bottom: 0.35rem;
+      letter-spacing: -0.06em;
+    }
+
+    .coupon-lock {
+      font-size: 1.9rem;
+      margin: 0.5rem 0;
+      display: inline-block;
+      transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    }
+
+    .coupon-card.unlocked .coupon-lock {
+      transform: scale(1.04);
+      color: #95d9a9;
+    }
+
+    .coupon-benefit {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #9fe0b0;
+      margin-top: 0.5rem;
+      display: none;
+      letter-spacing: -0.06em;
+    }
+
+    .coupon-card.unlocked .coupon-benefit {
+      display: block;
+    }
+
+    .coupon-card.unlocked::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(120, 211, 142, 0.9), transparent);
+      opacity: 1;
+    }
+
+    /* ==========================================================================
+       5. PAINEL DE CONTROLE DE ETAPAS & MODO AULA
+       ========================================================================== */
+    .stage-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.1rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .quiz-box {
+      background: linear-gradient(180deg, rgba(25, 18, 12, 0.96), rgba(17, 13, 9, 0.96));
+      border: 1px solid rgba(255, 138, 31, 0.34);
+      border-radius: var(--radius-md);
+      padding: 1.35rem 1.5rem;
+      max-width: 700px;
+      width: 100%;
+      box-shadow: var(--shadow-soft);
+      display: none;
+    }
+
+    .quiz-box.active {
+      display: block;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .quiz-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      color: var(--color-brand);
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+
+    .quiz-question {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .quiz-option {
+      background-color: #120d09;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.6rem 1rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      text-align: left;
+      font-size: 0.95rem;
+      transition: var(--transition-fast);
+    }
+
+    .quiz-option:hover {
+      background-color: #2a1b11;
+    }
+
+    .quiz-option.correct {
+      background-color: rgba(20, 184, 166, 0.2);
+      border-color: var(--color-map);
+      color: var(--color-map);
+    }
+
+    .quiz-option.wrong {
+      background-color: rgba(239, 68, 68, 0.2);
+      border-color: var(--color-danger);
+      color: var(--color-danger);
+    }
+
+    .btn-action {
+      background: var(--color-brand);
+      color: #19120d;
+      border: 1px solid rgba(240, 138, 60, 0.3);
+      padding: 0.68rem 1.25rem;
+      font-size: 0.92rem;
+      font-weight: 800;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: none;
+      transition: transform var(--transition-fast), opacity var(--transition-fast), filter var(--transition-fast), border-color var(--transition-fast);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .btn-action:hover:not(:disabled) {
+      transform: translateY(-1px);
+      opacity: 0.96;
+      box-shadow: none;
+    }
+
+    .btn-action:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      box-shadow: none;
+      filter: grayscale(1);
+    }
+
+    .btn-action.map-btn {
+      background: var(--color-map);
+      box-shadow: none;
+    }
+
+    .btn-action.filter-btn {
+      background: var(--color-filter);
+      box-shadow: none;
+    }
+
+    .btn-action.reduce-btn {
+      background: var(--color-reduce);
+      box-shadow: none;
+    }
+
+    /* ==========================================================================
+       6. FAIXA EXPLICATIVA & CÓDIGO
+       ========================================================================== */
+    .explanation-panel {
+      background: linear-gradient(180deg, rgba(26, 18, 12, 0.96), rgba(18, 14, 10, 0.96));
+      border-radius: var(--radius-md);
+      border-left: 4px solid var(--color-brand);
+      padding: 0.9rem 1.1rem;
+      margin-bottom: 1rem;
+      display: none;
+      animation: fadeIn 0.4s ease-out;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+    }
+
+    .explanation-panel.active {
+      display: block;
+    }
+
+    .explanation-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .explanation-tag {
+      font-family: var(--font-code);
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      color: #0f172a;
+    }
+
+    .tag-map { background-color: var(--color-map); }
+    .tag-filter { background-color: var(--color-filter); }
+    .tag-reduce { background-color: var(--color-reduce); }
+
+    .explanation-title {
+      font-weight: 700;
+      font-size: 1.08rem;
+      letter-spacing: -0.04em;
+    }
+
+    .explanation-desc {
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+
+    .code-box {
+      background-color: #0f172a;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 0.8rem 1rem;
+      font-family: var(--font-code);
+      font-size: 0.9rem;
+      color: #38bdf8;
+      overflow-x: auto;
+    }
+
+    .stage-status-msg {
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    /* ==========================================================================
+       7. GRADE DE PRODUTOS & CARDS
+       ========================================================================== */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 0.8rem;
+      margin-bottom: 1.3rem;
+    }
+
+    .product-card {
+      background: linear-gradient(180deg, rgba(21, 23, 26, 0.96), rgba(12, 14, 16, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-md);
+      padding: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .product-card:nth-child(3n + 1) {
+      border-color: rgba(240, 138, 60, 0.18);
+    }
+
+    .product-card:nth-child(3n + 2) {
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .product-card:nth-child(3n + 3) {
+      border-color: rgba(224, 199, 125, 0.18);
+    }
+
+    .product-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(240, 138, 60, 0.7), transparent);
+      opacity: 0.85;
+    }
+
+    .product-card:nth-child(3n + 2)::before {
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.42), transparent);
+    }
+
+    .product-card:nth-child(3n + 3)::before {
+      background: linear-gradient(90deg, transparent, rgba(228, 199, 125, 0.75), transparent);
+    }
+
+    .product-card:hover {
+      border-color: rgba(240, 138, 60, 0.38);
+      transform: translateY(-3px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.24);
+    }
+
+    .product-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.8rem;
+    }
+
+    .product-visual {
+      width: 100%;
+      height: 88px;
+      border-radius: 12px;
+      background: rgba(12, 14, 16, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.8rem;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+    }
+
+    .product-visual::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent 55%);
+      pointer-events: none;
+    }
+
+    .product-visual svg {
+      width: 80%;
+      height: 68%;
+      display: block;
+      opacity: 0.96;
+    }
+
+    .product-icon {
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      background-color: #1b140f;
+      color: var(--text-soft);
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(216, 115, 42, 0.18);
+      text-transform: uppercase;
+    }
+
+    .product-card:nth-child(3n + 2) .product-icon {
+      background-color: #171a1d;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .product-card:nth-child(3n + 3) .product-icon {
+      background-color: #18170f;
+      border-color: rgba(228, 199, 125, 0.18);
+    }
+
+    .product-status-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 12px;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .product-status-badge.visible {
+      opacity: 1;
+    }
+
+    .badge-map { background-color: rgba(20, 184, 166, 0.2); color: var(--color-map); border: 1px solid var(--color-map); }
+    .badge-analyzing { background-color: rgba(245, 158, 11, 0.2); color: var(--color-filter); border: 1px solid var(--color-filter); }
+    .badge-passed { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #22c55e; }
+    .badge-rejected { background-color: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+
+    .product-name {
+      font-size: 1.04rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      letter-spacing: -0.04em;
+    }
+
+    .product-category {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 1.1rem;
+      letter-spacing: 0.02em;
+    }
+
+    .product-price-container {
+      margin-top: auto;
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+    }
+
+    .price-old {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      text-decoration: line-through;
+      transition: var(--transition-fast);
+    }
+
+    .price-current {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text-main);
+      transition: color 0.3s ease;
+      letter-spacing: -0.05em;
+    }
+
+    /* Estados animados dos cards */
+    .product-card.map-transformed {
+      border-color: var(--color-map);
+    }
+
+    .product-card.map-transformed .price-current {
+      color: var(--color-map);
+    }
+
+    .product-card.filter-passed {
+      border-color: var(--color-filter);
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+    }
+
+    .product-card.filter-rejected {
+      opacity: 0.3;
+      transform: scale(0.92) translateY(10px);
+      filter: grayscale(0.8);
+      border-color: var(--color-danger);
+    }
+
+    .product-card.filter-hidden {
+      display: none;
+    }
+
+    .product-card.reduce-highlight {
+      border-color: var(--color-reduce);
+      transform: scale(1.03);
+      box-shadow: 0 0 20px rgba(217, 70, 239, 0.3);
+    }
+
+    /* ==========================================================================
+       8. PAINEL DO TOTAL (REDUCE) & RESUMO FINAL
+       ========================================================================== */
+    .total-panel {
+      background: linear-gradient(135deg, rgba(31, 24, 19, 0.96), rgba(58, 35, 20, 0.96));
+      border: 1px solid rgba(239, 139, 61, 0.34);
+      border-radius: var(--radius-lg);
+      padding: 1.15rem 1rem;
+      text-align: center;
+      margin-bottom: 1.2rem;
+      display: none;
+      box-shadow: 0 18px 36px rgba(35, 21, 11, 0.18);
+    }
+
+    .total-panel.active {
+      display: block;
+      animation: slideUp 0.5s ease-out;
+    }
+
+    .total-label {
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .total-amount {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--color-reduce);
+      line-height: 1;
+      margin-bottom: 0.8rem;
+      font-family: var(--font-family);
+      letter-spacing: -0.08em;
+    }
+
+    .total-breakdown {
+      font-family: var(--font-code);
+      background-color: rgba(15, 23, 42, 0.6);
+      padding: 0.6rem 1rem;
+      border-radius: var(--radius-sm);
+      display: inline-block;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Tela Final / Summary Dashboard */
+    .final-dashboard {
+      background: linear-gradient(180deg, rgba(15, 24, 38, 0.96), rgba(9, 16, 27, 0.98));
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      border-radius: var(--radius-lg);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      display: none;
+      animation: fadeIn 0.5s ease-out;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .final-dashboard.active {
+      display: block;
+    }
+
+    .final-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background-color: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+      border: 1px solid #22c55e;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .pipeline-diagram {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background-color: #0f172a;
+      border-radius: var(--radius-md);
+    }
+
+    .pipeline-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.8rem 1.2rem;
+      background-color: #1e293b;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      min-width: 140px;
+    }
+
+    .node-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .node-val {
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .pipeline-arrow {
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .final-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.75rem 1.5rem;
+      border-radius: 30px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .btn-secondary:hover {
+      background-color: #334155;
+    }
+
+    /* Animations Keyframes */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Respeito a prefers-reduced-motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      .coupon-card {
+        animation: none !important;
+      }
+    }
+
+    /* Responsividade com ajuste para desktop e tablet */
+    @media (min-width: 1024px) {
+      .container {
+        padding-top: 0.7rem;
+      }
+
+      .hero-section {
+        margin-bottom: 0.9rem;
+      }
+
+      .coupon-wrapper {
+        margin-bottom: 0.9rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .app-header {
+        padding: 0.75rem 1rem;
+      }
+      .brand-tag {
+        display: none;
+      }
+      .coupon-card {
+        padding: 1.5rem 1rem;
+      }
+      .coupon-title {
+        font-size: 1.2rem;
+      }
+      .coupon-benefit {
+        font-size: 1.4rem;
+      }
+      .total-amount {
+        font-size: 2.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER DA APLICAÇÃO -->
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-logo">Array Market</span>
+      <span class="brand-tag">Marketplace experimental</span>
+    </div>
+
+    <div class="header-actions">
+      <button id="btn-toggle-aula" class="btn-toggle-aula" aria-label="Alternar Modo Aula">
+        <span id="aula-status-text">Modo Aula: ON</span>
+      </button>
+      <div class="cart-counter">
+        <span id="cart-count">6 produtos</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- STEPPER DE PROGRESSO DO PIPELINE -->
+  <nav class="stepper-container" aria-label="Progresso da transformação">
+    <ul class="stepper" id="stepper">
+      <li class="step-item active" data-step="cupom">
+        <span class="step-number">1</span> Cupom
+      </li>
+      <li class="step-divider"></li>
+      <li class="step-item" data-step="map">
+        <span class="step-number">2</span> map()
+      </li>
+      <li class="step-divider"></li>
+      <li class="step-item" data-step="filter">
+        <span class="step-number">3</span> filter()
+      </li>
+      <li class="step-divider"></li>
+      <li class="step-item" data-step="reduce">
+        <span class="step-number">4</span> reduce()
+      </li>
+      <li class="step-divider"></li>
+      <li class="step-item" data-step="resultado">
+        <span class="step-number">5</span> Resultado
+      </li>
+    </ul>
+  </nav>
+
+  <!-- CONTAINER PRINCIPAL -->
+  <main class="container">
+
+    <!-- HERO SECTION -->
+    <section class="hero-section" id="hero-section">
+      <h1 class="hero-title">Seu carrinho acaba de receber uma missão</h1>
+      <p class="hero-subtitle">
+        Clique no cupom surpresa e desbloqueie uma transformação especial nos seus produtos usando métodos funcionais em JavaScript.
+      </p>
+      <div class="scroll-cta">
+        <span id="hero-cta-text">Encontrar cupom</span>
+      </div>
+    </section>
+
+    <!-- CUPOM GIGANTE -->
+    <div class="coupon-wrapper">
+      <div id="coupon-card" 
+           class="coupon-card" 
+           role="button" 
+           tabindex="0" 
+           aria-label="Cupom surpresa. Clique para desbloquear R$ 20 OFF em cada produto">
+        <span class="coupon-tag">Oferta limitada</span>
+        <div class="coupon-title">CUPOM SURPRESA</div>
+        <div id="coupon-lock-icon" class="coupon-lock">OFF</div>
+        <div id="coupon-subtitle" style="font-size: 0.95rem; color: #cbd5e1;">Clique para revelar</div>
+        <div id="coupon-benefit" class="coupon-benefit">R$ 20 OFF em cada produto</div>
+      </div>
+    </div>
+
+    <!-- ÁREA DE CONTROLE & PERGUNTAS MODO AULA -->
+    <section class="stage-controls">
+      <!-- Quiz Card Modo Aula -->
+      <div id="quiz-box" class="quiz-box" aria-live="polite">
+        <div class="quiz-header">Pergunta do Modo Aula</div>
+        <div id="quiz-question" class="quiz-question"></div>
+        <div id="quiz-options" class="quiz-options"></div>
+        <button id="btn-quiz-continue" class="btn-action" style="display:none; margin-top: 0.5rem; font-size: 0.9rem; padding: 0.5rem 1.2rem;">
+          Revelar próxima etapa
+        </button>
+      </div>
+
+      <!-- Botão de Ação Principal -->
+      <button id="btn-main-action" class="btn-action" disabled>
+        Desbloqueie o cupom acima
+      </button>
+    </section>
+
+    <!-- FAIXA EXPLICATIVA DO MÉTODOS JS -->
+    <section id="explanation-panel" class="explanation-panel">
+      <div class="explanation-header">
+        <span id="explanation-tag" class="explanation-tag">map()</span>
+        <span id="explanation-title" class="explanation-title">Transformando cada produto</span>
+      </div>
+      <p id="explanation-desc" class="explanation-desc">
+        O map() passou por cada produto e criou uma nova versão com R$ 20,00 de desconto.
+      </p>
+      <div class="code-box" id="code-box">
+        produtos.map(produto => ({ ...produto, preco: produto.preco - 20 }));
+      </div>
+      <div id="stage-status-msg" class="stage-status-msg"></div>
+    </section>
+
+    <!-- GRADE DE PRODUTOS -->
+    <section id="products-grid" class="products-grid" aria-label="Lista de produtos do carrinho"></section>
+
+    <!-- PAINEL DO TOTAL (REDUCE) -->
+    <section id="total-panel" class="total-panel">
+      <div class="total-label">Total Acumulado do Carrinho</div>
+      <div id="total-amount" class="total-amount">R$ 0,00</div>
+      <div id="total-breakdown" class="total-breakdown">Calculando com reduce()...</div>
+    </section>
+
+    <!-- TELA FINAL E DASHBOARD DE CONEXÃO -->
+    <section id="final-dashboard" class="final-dashboard">
+      <div class="final-badge">Pipeline concluído</div>
+      <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem;">Cupom aplicado com sucesso!</h2>
+      <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">
+        Você transformou um carrinho usando os principais métodos funcionais do JavaScript.
+      </p>
+
+      <div class="pipeline-diagram">
+        <div class="pipeline-node">
+          <span class="node-title">Início</span>
+          <span class="node-val">6 originais</span>
+        </div>
+        <span class="pipeline-arrow">➔ map()</span>
+        <div class="pipeline-node">
+          <span class="node-title">Desconto</span>
+          <span class="node-val">6 c/ R$ 20 OFF</span>
+        </div>
+        <span class="pipeline-arrow">➔ filter()</span>
+        <div class="pipeline-node">
+          <span class="node-title">Elegíveis</span>
+          <span class="node-val">4 abaixo R$ 200</span>
+        </div>
+        <span class="pipeline-arrow">➔ reduce()</span>
+        <div class="pipeline-node" style="border-color: var(--color-reduce);">
+          <span class="node-title">Total Final</span>
+          <span class="node-val" style="color: var(--color-reduce);">R$ 355,00</span>
+        </div>
+      </div>
+
+      <div class="code-box" style="text-align: left; max-width: 700px; margin: 0 auto 1.5rem auto;">
+// Pipeline encadeado executado com sucesso:
+produtosOriginais
+  .map(produto => ({ ...produto, preco: produto.preco - 20 }))
+  .filter(produto => produto.preco < 200)
+  .reduce((total, produto) => total + produto.preco, 0);
+      </div>
+
+      <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 1rem;">
+        <strong style="color: var(--color-map)">map()</strong> transformou os preços. 
+        <strong style="color: var(--color-filter)">filter()</strong> selecionou os produtos elegíveis. 
+        <strong style="color: var(--color-reduce)">reduce()</strong> calculou o total final.
+      </p>
+
+      <div class="final-actions">
+        <button id="btn-reset" class="btn-action">
+          Recomeçar experiência
+        </button>
+        <button id="btn-review" class="btn-secondary">
+          Ver explicação novamente
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- LÓGICA EM JAVASCRIPT PURO -->
+  <script>
+    /* ==========================================================================
+       DADOS INICIAIS (IMUTÁVEIS)
+       ========================================================================== */
+    const produtosOriginais = [
+      { id: 1, nome: "Mouse sem fio", preco: 80, icone: "M", categoria: "Periféricos", visual: "mouse" },
+      { id: 2, nome: "Teclado mecânico", preco: 150, icone: "K", categoria: "Periféricos", visual: "teclado" },
+      { id: 3, nome: "Mousepad grande", preco: 25, icone: "P", categoria: "Acessórios", visual: "mousepad" },
+      { id: 4, nome: "Webcam HD", preco: 180, icone: "W", categoria: "Vídeo", visual: "webcam" },
+      { id: 5, nome: "Monitor ultrawide", preco: 900, icone: "MO", categoria: "Monitores", visual: "monitor" },
+      { id: 6, nome: "Headset gamer", preco: 220, icone: "H", categoria: "Áudio", visual: "headset" }
+    ];
+
+    /* ==========================================================================
+       ESTADO DA APLICAÇÃO
+       ========================================================================== */
+    const state = {
+      etapaAtual: "cupom", // 'cupom' | 'map' | 'filter' | 'reduce' | 'resultado'
+      cupomDesbloqueado: false,
+      produtosOriginais: [...produtosOriginais],
+      produtosComDesconto: [],
+      produtosSelecionados: [],
+      total: 0,
+      animando: false,
+      modoAula: true,
+      perguntaRespondida: false
+    };
+
+    /* ==========================================================================
+       ELEMENTOS DO DOM
+       ========================================================================== */
+    const dom = {
+      cartCount: document.getElementById('cart-count'),
+      stepper: document.getElementById('stepper'),
+      couponCard: document.getElementById('coupon-card'),
+      couponLockIcon: document.getElementById('coupon-lock-icon'),
+      couponSubtitle: document.getElementById('coupon-subtitle'),
+      btnToggleAula: document.getElementById('btn-toggle-aula'),
+      aulaStatusText: document.getElementById('aula-status-text'),
+      quizBox: document.getElementById('quiz-box'),
+      quizQuestion: document.getElementById('quiz-question'),
+      quizOptions: document.getElementById('quiz-options'),
+      btnQuizContinue: document.getElementById('btn-quiz-continue'),
+      btnMainAction: document.getElementById('btn-main-action'),
+      explanationPanel: document.getElementById('explanation-panel'),
+      explanationTag: document.getElementById('explanation-tag'),
+      explanationTitle: document.getElementById('explanation-title'),
+      explanationDesc: document.getElementById('explanation-desc'),
+      codeBox: document.getElementById('code-box'),
+      stageStatusMsg: document.getElementById('stage-status-msg'),
+      productsGrid: document.getElementById('products-grid'),
+      totalPanel: document.getElementById('total-panel'),
+      totalAmount: document.getElementById('total-amount'),
+      totalBreakdown: document.getElementById('total-breakdown'),
+      finalDashboard: document.getElementById('final-dashboard'),
+      btnReset: document.getElementById('btn-reset'),
+      btnReview: document.getElementById('btn-review'),
+      heroSection: document.getElementById('hero-section')
+    };
+
+    /* ==========================================================================
+       FUNÇÕES UTILITÁRIAS & FORMATADORES
+       ========================================================================== */
+    function formatarPreco(valor) {
+      return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    /* ==========================================================================
+       RENDERIZADORES DE INTERFACE
+       ========================================================================== */
+    function renderStepper() {
+      const steps = dom.stepper.querySelectorAll('.step-item');
+      const order = ['cupom', 'map', 'filter', 'reduce', 'resultado'];
+      const currentIndex = order.indexOf(state.etapaAtual);
+
+      steps.forEach((stepEl) => {
+        const stepName = stepEl.getAttribute('data-step');
+        const stepIndex = order.indexOf(stepName);
+
+        stepEl.classList.remove('active', 'completed');
+        if (stepIndex === currentIndex) {
+          stepEl.classList.add('active');
+        } else if (stepIndex < currentIndex) {
+          stepEl.classList.add('completed');
+        }
+      });
+    }
+
+    function renderProdutos(listaProdutos, estadoCard = {}) {
+      dom.productsGrid.innerHTML = '';
+
+      const visualMap = {
+        mouse: `
+          <svg viewBox="0 0 120 80" aria-hidden="true">
+            <rect x="22" y="24" width="76" height="42" rx="20" fill="#1a1d21" stroke="#d7dbe0" stroke-width="2"/>
+            <rect x="47" y="16" width="26" height="16" rx="8" fill="#22272c"/>
+            <circle cx="42" cy="41" r="4" fill="#f0b066"/>
+            <circle cx="78" cy="41" r="4" fill="#f0b066"/>
+            <path d="M38 56C46 60 53 62 60 62C67 62 74 60 82 56" fill="none" stroke="#f0b066" stroke-width="3.5" stroke-linecap="round"/>
+          </svg>
+        `,
+        teclado: `
+          <svg viewBox="0 0 120 80" aria-hidden="true">
+            <rect x="12" y="28" width="96" height="30" rx="8" fill="#171b1e" stroke="#d7dbe0" stroke-width="2"/>
+            <rect x="18" y="34" width="12" height="8" rx="2" fill="#f0b066"/>
+            <rect x="34" y="34" width="12" height="8" rx="2" fill="#f0b066"/>
+            <rect x="50" y="34" width="12" height="8" rx="2" fill="#f0b066"/>
+            <rect x="66" y="34" width="12" height="8" rx="2" fill="#f0b066"/>
+            <rect x="82" y="34" width="12" height="8" rx="2" fill="#f0b066"/>
+            <rect x="26" y="46" width="68" height="6" rx="3" fill="#f0b066" opacity="0.6"/>
+          </svg>
+        `,
+        mousepad: `
+          <svg viewBox="0 0 120 80" aria-hidden="true">
+            <rect x="20" y="18" width="80" height="42" rx="10" fill="#171b1e" stroke="#d7dbe0" stroke-width="2"/>
+            <rect x="28" y="26" width="64" height="26" rx="8" fill="#2a3138"/>
+            <circle cx="60" cy="39" r="8" fill="#f0b066"/>
+          </svg>
+        `,
+        webcam: `
+          <svg viewBox="0 0 120 80" aria-hidden="true">
+            <rect x="30" y="18" width="60" height="38" rx="8" fill="#171b1e" stroke="#d7dbe0" stroke-width="2"/>
+            <circle cx="60" cy="37" r="12" fill="#2a3138" stroke="#f0b066" stroke-width="2.5"/>
+            <circle cx="60" cy="37" r="5" fill="#f0b066"/>
+            <rect x="52" y="56" width="16" height="8" rx="4" fill="#f0b066"/>
+          </svg>
+        `,
+        monitor: `
+          <svg viewBox="0 0 120 80" aria-hidden="true">
+            <rect x="18" y="18" width="84" height="42" rx="6" fill="#171b1e" stroke="#d7dbe0" stroke-width="2"/>
+            <rect x="26" y="25" width="68" height="24" rx="3" fill="#2a3138"/>
+            <circle cx="52" cy="37" r="6" fill="#f0b066"/>
+            <circle cx="70" cy="37" r="6" fill="#f0b066" opacity="0.7"/>
+            <path d="M44 62H76L70 70H50L44 62Z" fill="#d7dbe0"/>
+          </svg>
+        `,
+        headset: `
+          <svg viewBox="0 0 120 80" aria-hidden="true">
+            <path d="M30 48C30 31 43 18 60 18C77 18 90 31 90 48V56H80V48C80 38 71 30 60 30C49 30 40 38 40 48V56H30V48Z" fill="#171b1e" stroke="#d7dbe0" stroke-width="2"/>
+            <rect x="24" y="49" width="14" height="18" rx="6" fill="#2a3138"/>
+            <rect x="82" y="49" width="14" height="18" rx="6" fill="#2a3138"/>
+            <path d="M38 54C45 58 52 60 60 60C68 60 75 58 82 54" fill="none" stroke="#f0b066" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        `
+      };
+
+      listaProdutos.forEach((produto) => {
+        const card = document.createElement('article');
+        card.className = 'product-card';
+        card.id = `prod-card-${produto.id}`;
+
+        // Aplicação de classes por estado
+        if (estadoCard.mapTransformed) card.classList.add('map-transformed');
+        if (estadoCard.filterPassed && estadoCard.passedIds?.includes(produto.id)) {
+          card.classList.add('filter-passed');
+        }
+        if (estadoCard.filterRejected && estadoCard.rejectedIds?.includes(produto.id)) {
+          card.classList.add('filter-rejected');
+        }
+
+        const temDesconto = produto.precoOriginal && produto.precoOriginal !== produto.preco;
+
+        card.innerHTML = `
+          <div class="product-header">
+            <div class="product-icon">${produto.icone}</div>
+            <span id="badge-${produto.id}" class="product-status-badge"></span>
+          </div>
+          <div class="product-visual">${visualMap[produto.visual] || visualMap.mouse}</div>
+          <div class="product-name">${produto.nome}</div>
+          <div class="product-category">${produto.categoria}</div>
+          <div class="product-price-container">
+            ${temDesconto ? `<span class="price-old">${formatarPreco(produto.precoOriginal)}</span>` : ''}
+            <span id="price-${produto.id}" class="price-current">${formatarPreco(produto.preco)}</span>
+          </div>
+        `;
+
+        dom.productsGrid.appendChild(card);
+      });
+    }
+
+    /* ==========================================================================
+       LÓGICA E FLUXO DO MODO AULA (PERGUNTAS)
+       ========================================================================== */
+    const perguntasModoAula = {
+      map: {
+        pergunta: "Se todos os produtos receberem R$ 20,00 de desconto, quantos produtos continuarão no array?",
+        opcoes: [
+          { texto: "6 produtos (O map() sempre mantém a mesma quantidade de itens)", correta: true },
+          { texto: "4 produtos (Alguns itens serão eliminados)", correta: false },
+          { texto: "0 produtos (Cria um array vazio)", correta: false }
+        ]
+      },
+      filter: {
+        pergunta: "O produto Headset gamer (que ficou em R$ 200,00) passa em uma condição estritamente menor que 200 (produto.preco < 200)?",
+        opcoes: [
+          { texto: "Não, pois 200 não é estritamente menor que 200", correta: true },
+          { texto: "Sim, pois 200 é igual ao limite", correta: false }
+        ]
+      },
+      reduce: {
+        pergunta: "Qual será a soma dos quatro produtos aprovados (R$ 60 + R$ 130 + R$ 5 + R$ 160)?",
+        opcoes: [
+          { texto: "R$ 355,00", correta: true },
+          { texto: "R$ 375,00", correta: false },
+          { texto: "R$ 400,00", correta: false }
+        ]
+      }
+    };
+
+    function checarEExibirQuiz(etapa, callbackContinuar) {
+      if (!state.modoAula || !perguntasModoAula[etapa]) {
+        callbackContinuar();
+        return;
+      }
+
+      state.perguntaRespondida = false;
+      const quizData = perguntasModoAula[etapa];
+      dom.quizQuestion.textContent = quizData.pergunta;
+      dom.quizOptions.innerHTML = '';
+      dom.btnQuizContinue.style.display = 'none';
+      dom.quizBox.classList.add('active');
+
+      quizData.opcoes.forEach((opt) => {
+        const btnOpt = document.createElement('button');
+        btnOpt.className = 'quiz-option';
+        btnOpt.textContent = opt.texto;
+        btnOpt.addEventListener('click', () => {
+          if (state.perguntaRespondida) return;
+          
+          const todasOpt = dom.quizOptions.querySelectorAll('.quiz-option');
+          todasOpt.forEach(b => b.style.pointerEvents = 'none');
+
+          if (opt.correta) {
+            btnOpt.classList.add('correct');
+          } else {
+            btnOpt.classList.add('wrong');
+          }
+          
+          state.perguntaRespondida = true;
+          dom.btnQuizContinue.style.display = 'inline-flex';
+        });
+        dom.quizOptions.appendChild(btnOpt);
+      });
+
+      // Handler para o botão de continuar do quiz
+      const handleContinue = () => {
+        dom.quizBox.classList.remove('active');
+        dom.btnQuizContinue.removeEventListener('click', handleContinue);
+        callbackContinuar();
+      };
+      dom.btnQuizContinue.addEventListener('click', handleContinue);
+    }
+
+    /* ==========================================================================
+       ETAPA 1: DESBLOQUEIO DO CUPOM
+       ========================================================================== */
+    function desbloquearCupom() {
+      if (state.cupomDesbloqueado || state.animando) return;
+
+      state.cupomDesbloqueado = true;
+      dom.couponCard.classList.add('unlocked');
+      dom.couponLockIcon.textContent = 'ATIVO';
+      dom.couponSubtitle.textContent = 'Cupom desbloqueado. Agora vamos transformar todos os preços.';
+
+      dom.btnMainAction.disabled = false;
+      dom.btnMainAction.className = 'btn-action map-btn';
+      dom.btnMainAction.innerHTML = 'Aplicar cupom (map)';
+
+      // Atualizar acessibilidade
+      dom.couponCard.setAttribute('aria-label', 'Cupom desbloqueado: R$ 20 OFF em cada produto');
+    }
+
+    /* ==========================================================================
+       ETAPA 2: EXECUTAR MAP()
+       ========================================================================== */
+    function aplicarCupom() {
+      if (state.animando) return;
+
+      checarEExibirQuiz('map', () => {
+        executarMap();
+      });
+    }
+
+    function executarMap() {
+      state.animando = true;
+      state.etapaAtual = "map";
+      renderStepper();
+
+      // Desabilitar botão durante animação
+      dom.btnMainAction.disabled = true;
+
+      // Execução REAL do .map() sem mutar o original (usando spread)
+      state.produtosComDesconto = state.produtosOriginais.map(produto => ({
+        ...produto,
+        precoOriginal: produto.preco,
+        preco: produto.preco - 20
+      }));
+
+      // Atualizar painel explicativo
+      dom.explanationTag.className = 'explanation-tag tag-map';
+      dom.explanationTag.textContent = 'map()';
+      dom.explanationTitle.textContent = 'Transformando cada produto';
+      dom.explanationDesc.textContent = 'O map() passou por cada produto e criou uma nova versão com R$ 20,00 de desconto.';
+      dom.codeBox.textContent = `const produtosComDesconto = produtosOriginais.map(produto => ({
+  ...produto,
+  preco: produto.preco - 20
+}));`;
+      dom.explanationPanel.classList.add('active');
+
+      animarMap();
+    }
+
+    function animarMap() {
+      let index = 0;
+      const totalItens = state.produtosComDesconto.length;
+
+      function transformarProximo() {
+        if (index < totalItens) {
+          const produto = state.produtosComDesconto[index];
+          const cardEl = document.getElementById(`prod-card-${produto.id}`);
+          const priceEl = document.getElementById(`price-${produto.id}`);
+          const badgeEl = document.getElementById(`badge-${produto.id}`);
+
+          if (cardEl) {
+            cardEl.classList.add('map-transformed');
+            if (priceEl) priceEl.textContent = formatarPreco(produto.preco);
+            if (badgeEl) {
+              badgeEl.textContent = '- R$ 20,00';
+              badgeEl.className = 'product-status-badge badge-map visible';
+            }
+          }
+
+          index++;
+          setTimeout(transformarProximo, 300);
+        } else {
+          // Final da animação do map
+          state.animando = false;
+          dom.stageStatusMsg.textContent = '💡 6 produtos entraram. 6 produtos saíram.';
+          
+          dom.btnMainAction.disabled = false;
+          dom.btnMainAction.className = 'btn-action filter-btn';
+          dom.btnMainAction.innerHTML = 'Filtrar produtos (filter)';
+        }
+      }
+
+      transformarProximo();
+    }
+
+    /* ==========================================================================
+       ETAPA 3: EXECUTAR FILTER()
+       ========================================================================== */
+    function executarFilter() {
+      if (state.animando) return;
+
+      checarEExibirQuiz('filter', () => {
+        state.animando = true;
+        state.etapaAtual = "filter";
+        renderStepper();
+        dom.btnMainAction.disabled = true;
+
+        // Execução REAL do .filter()
+        state.produtosSelecionados = state.produtosComDesconto.filter(
+          produto => produto.preco < 200
+        );
+
+        // Atualizar painel explicativo
+        dom.explanationTag.className = 'explanation-tag tag-filter';
+        dom.explanationTag.textContent = 'filter()';
+        dom.explanationTitle.textContent = 'Selecionando os produtos elegíveis';
+        dom.explanationDesc.textContent = 'O filter() verifica quais produtos ficaram abaixo de R$ 200,00 depois do desconto.';
+        dom.codeBox.textContent = `const produtosSelecionados = produtosComDesconto.filter(
+  produto => produto.preco < 200
+);`;
+
+        animarFilter();
+      });
+    }
+
+    function animarFilter() {
+      let index = 0;
+      const totalItens = state.produtosComDesconto.length;
+
+      function analisarProximo() {
+        if (index < totalItens) {
+          const produto = state.produtosComDesconto[index];
+          const cardEl = document.getElementById(`prod-card-${produto.id}`);
+          const badgeEl = document.getElementById(`badge-${produto.id}`);
+
+          if (badgeEl) {
+            badgeEl.textContent = 'Analisando...';
+            badgeEl.className = 'product-status-badge badge-analyzing visible';
+          }
+
+          setTimeout(() => {
+            const passou = produto.preco < 200;
+            if (passou) {
+              if (cardEl) cardEl.classList.add('filter-passed');
+              if (badgeEl) {
+                badgeEl.textContent = 'Passou';
+                badgeEl.className = 'product-status-badge badge-passed visible';
+              }
+            } else {
+              if (cardEl) cardEl.classList.add('filter-rejected');
+              if (badgeEl) {
+                badgeEl.textContent = 'Fora do filtro';
+                badgeEl.className = 'product-status-badge badge-rejected visible';
+              }
+            }
+
+            index++;
+            setTimeout(analisarProximo, 400);
+          }, 300);
+
+        } else {
+          // Após análise individual, esconder reprovados da grade após transição
+          setTimeout(() => {
+            state.produtosComDesconto.forEach((p) => {
+              if (p.preco >= 200) {
+                const cardEl = document.getElementById(`prod-card-${p.id}`);
+                if (cardEl) cardEl.classList.add('product-card-hidden');
+              }
+            });
+
+            // Atualizar contador do header
+            dom.cartCount.textContent = '4 produtos elegíveis';
+            dom.stageStatusMsg.textContent = '4 de 6 produtos passaram no filtro (Headset de R$ 200,00 foi removido pois 200 não é menor que 200).';
+
+            state.animando = false;
+            dom.btnMainAction.disabled = false;
+            dom.btnMainAction.className = 'btn-action reduce-btn';
+            dom.btnMainAction.innerHTML = 'Calcular total (reduce)';
+          }, 600);
+        }
+      }
+
+      analisarProximo();
+    }
+
+    /* ==========================================================================
+       ETAPA 4: EXECUTAR REDUCE()
+       ========================================================================== */
+    function executarReduce() {
+      if (state.animando) return;
+
+      checarEExibirQuiz('reduce', () => {
+        state.animando = true;
+        state.etapaAtual = "reduce";
+        renderStepper();
+        dom.btnMainAction.disabled = true;
+
+        // Execução REAL do .reduce()
+        state.total = state.produtosSelecionados.reduce(
+          (acumulador, produto) => acumulador + produto.preco,
+          0
+        );
+
+        // Atualizar painel explicativo
+        dom.explanationTag.className = 'explanation-tag tag-reduce';
+        dom.explanationTag.textContent = 'reduce()';
+        dom.explanationTitle.textContent = 'Calculando o total do carrinho';
+        dom.explanationDesc.textContent = 'O reduce() combinou os quatro produtos aprovados em um único valor numérico.';
+        dom.codeBox.textContent = `const total = produtosSelecionados.reduce(
+  (total, produto) => total + produto.preco,
+  0
+);`;
+
+        dom.totalPanel.classList.add('active');
+        animarReduce();
+      });
+    }
+
+    function animarReduce() {
+      let index = 0;
+      let somaParcial = 0;
+      const aprovados = state.produtosSelecionados;
+      const totalItens = aprovados.length;
+      const historicoSoma = [];
+
+      function somarProximo() {
+        if (index < totalItens) {
+          const produto = aprovados[index];
+          const cardEl = document.getElementById(`prod-card-${produto.id}`);
+
+          // Highlight visual no card sendo somado
+          if (cardEl) cardEl.classList.add('reduce-highlight');
+
+          somaParcial += produto.preco;
+          historicoSoma.push(produto.preco);
+
+          dom.totalAmount.textContent = formatarPreco(somaParcial);
+          dom.totalBreakdown.textContent = historicoSoma.join(' + ') + ` = ${somaParcial}`;
+
+          setTimeout(() => {
+            if (cardEl) cardEl.classList.remove('reduce-highlight');
+            index++;
+            setTimeout(somarProximo, 600);
+          }, 400);
+
+        } else {
+          // Final do reduce
+          state.animando = false;
+          dom.stageStatusMsg.textContent = '4 produtos foram combinados em um único resultado de R$ 355,00.';
+          
+          dom.btnMainAction.disabled = false;
+          dom.btnMainAction.className = 'btn-action';
+          dom.btnMainAction.innerHTML = 'Ver resultado final';
+        }
+      }
+
+      somarProximo();
+    }
+
+    /* ==========================================================================
+       ETAPA 5: RESULTADO FINAL
+       ========================================================================== */
+    function renderResultadoFinal() {
+      state.etapaAtual = "resultado";
+      renderStepper();
+
+      // Ocultar controles intermediários e grade para focar no dashboard
+      dom.btnMainAction.style.display = 'none';
+      dom.explanationPanel.style.display = 'none';
+      dom.productsGrid.style.display = 'none';
+      dom.totalPanel.style.display = 'none';
+      dom.couponCard.parentElement.style.display = 'none';
+      dom.heroSection.style.display = 'none';
+
+      dom.finalDashboard.classList.add('active');
+    }
+
+    /* ==========================================================================
+       REINICIAR EXPERIÊNCIA (RESET COMPLETO)
+       ========================================================================== */
+    function resetarExperiencia() {
+      state.etapaAtual = "cupom";
+      state.cupomDesbloqueado = false;
+      state.produtosComDesconto = [];
+      state.produtosSelecionados = [];
+      state.total = 0;
+      state.animando = false;
+      state.perguntaRespondida = false;
+
+      // Restaurar DOM
+      dom.cartCount.textContent = '6 produtos';
+      dom.couponCard.classList.remove('unlocked');
+      dom.couponLockIcon.textContent = 'OFF';
+      dom.couponSubtitle.textContent = 'Clique para revelar';
+      dom.couponCard.parentElement.style.display = 'flex';
+      dom.heroSection.style.display = 'block';
+
+      dom.btnMainAction.style.display = 'inline-flex';
+      dom.btnMainAction.disabled = true;
+      dom.btnMainAction.className = 'btn-action';
+      dom.btnMainAction.innerHTML = 'Desbloqueie o cupom acima';
+
+      dom.explanationPanel.classList.remove('active');
+      dom.totalPanel.classList.remove('active');
+      dom.finalDashboard.classList.remove('active');
+      dom.quizBox.classList.remove('active');
+      dom.productsGrid.style.display = 'grid';
+
+      renderStepper();
+      renderProdutos(state.produtosOriginais);
+    }
+
+    /* ==========================================================================
+       INICIALIZAÇÃO & EVENT LISTENERS
+       ========================================================================== */
+    function init() {
+      renderProdutos(state.produtosOriginais);
+      renderStepper();
+
+      // Desbloqueio do cupom por clique ou teclado (Acessibilidade)
+      dom.couponCard.addEventListener('click', desbloquearCupom);
+      dom.couponCard.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          desbloquearCupom();
+        }
+      });
+
+      // Botão principal de ação sequencial
+      dom.btnMainAction.addEventListener('click', () => {
+        switch (state.etapaAtual) {
+          case 'cupom':
+            aplicarCupom();
+            break;
+          case 'map':
+            executarFilter();
+            break;
+          case 'filter':
+            executarReduce();
+            break;
+          case 'reduce':
+            renderResultadoFinal();
+            break;
+        }
+      });
+
+      // Alternar Modo Aula
+      dom.btnToggleAula.addEventListener('click', () => {
+        state.modoAula = !state.modoAula;
+        dom.btnToggleAula.classList.toggle('active', state.modoAula);
+        dom.aulaStatusText.textContent = `Modo Aula: ${state.modoAula ? 'ON' : 'OFF'}`;
+      });
+
+      // Botões da Tela Final
+      dom.btnReset.addEventListener('click', resetarExperiencia);
+      dom.btnReview.addEventListener('click', () => {
+        resetarExperiencia();
+      });
+    }
+
+    // Inicializar quando o DOM estiver pronto
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
