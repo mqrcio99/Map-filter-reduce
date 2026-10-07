@@ -1,6 +1,6 @@
-# 🗺️ Map · Filter · Reduce
+# 🛒 Array Market
 
-> Três funções. Infinitas possibilidades.
+> Aprenda `map`, `filter` e `reduce` aplicando um cupom de desconto no seu carrinho.
 
 **[▶ Ver ao vivo → map-filter-reduce-bice.vercel.app](https://map-filter-reduce-bice.vercel.app/)**
 
@@ -8,28 +8,38 @@
 
 ## 💡 A ideia
 
-`map`, `filter` e `reduce` são o trio que transforma loops confusos em código que se lê quase como uma frase. Este projeto existe para tornar essas três operações **visuais, interativas e fáceis de entender**.
+Explicações abstratas de `map`, `filter` e `reduce` costumam usar `[1, 2, 3]`. Aqui o aprendizado acontece num **marketplace experimental**: você recebe um carrinho com 6 produtos, revela um **cupom surpresa** e vê, passo a passo, cada método funcional transformando os dados.
 
-Em vez de decorar a sintaxe, você vê os dados fluindo.
+Sem decorar sintaxe. Você vê o que cada função faz com algo que já conhece: preço, desconto e total.
 
-| Função   | O que faz                               | Entra → Sai          |
-| -------- | --------------------------------------- | -------------------- |
-| `map`    | Transforma cada item                    | `[1, 2, 3]` → `[2, 4, 6]` |
-| `filter` | Mantém só o que passa no teste          | `[1, 2, 3]` → `[2, 3]`    |
-| `reduce` | Junta tudo em um único valor            | `[1, 2, 3]` → `6`         |
+## 🎮 Como funciona
 
-## ✨ Em código
+A experiência é um pipeline em 5 etapas:
+
+| Etapa | O que acontece |
+| ----- | -------------- |
+| 1. **Cupom** | Encontre e revele o cupom surpresa: **R$ 20 OFF** em cada produto |
+| 2. **`map()`** | Cada produto vira uma nova versão com o desconto aplicado |
+| 3. **`filter()`** | Só os produtos elegíveis (abaixo de R$ 200) continuam |
+| 4. **`reduce()`** | Os preços restantes são somados em um total |
+| 5. **Resultado** | Carrinho final: 6 produtos → 4 elegíveis → **R$ 355,00** |
+
+Há também o **Modo Aula**, que faz perguntas e libera cada etapa só quando você está pronto.
+
+## ✨ O código por trás
 
 ```js
-const numeros = [1, 2, 3, 4, 5];
-
-const resultado = numeros
-  .filter((n) => n % 2 === 1)   // [1, 3, 5]
-  .map((n) => n * 10)           // [10, 30, 50]
-  .reduce((acc, n) => acc + n, 0); // 90
+produtosOriginais
+  .map((produto) => ({ ...produto, preco: produto.preco - 20 }))
+  .filter((produto) => produto.preco < 200)
+  .reduce((total, produto) => total + produto.preco, 0);
 ```
 
-Sem `for`. Sem variável temporária. Só a intenção.
+- **`map()`** transforma os preços
+- **`filter()`** seleciona os elegíveis
+- **`reduce()`** calcula o total final
+
+Três métodos, uma frase. Esse é o ponto.
 
 ## 🚀 Rodando localmente
 
@@ -51,16 +61,17 @@ Depois é só abrir o endereço que aparecer no terminal.
 
 ## 🛠️ Stack
 
+- JavaScript
 - Deploy na [Vercel](https://vercel.com)
 - _(adicione aqui o framework e as libs que você usou)_
 
 ## 🤝 Contribuindo
 
-Achou um bug ou teve uma ideia? Abra uma *issue* ou mande um *pull request*. Toda contribuição é bem-vinda.
+Teve uma ideia de nova etapa, produto ou método (`find`, `some`, `every`...)? Abra uma *issue* ou mande um *pull request*.
 
 ## 📄 Licença
 
-MIT — use, estude, remixe.
+MIT. Use, estude, remixe.
 
 ---
 
